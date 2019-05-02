@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "./build/",
+    "target": "es6",
+    "noImplicitAny": true,
+    "baseUrl": "./",
+    "paths": {
+      "midgar": ["./lib/midgar"],
+      "services/*": ["./src/services/*"],
+      "src/*": ["./src/*"]
+    }
+  }
+}
