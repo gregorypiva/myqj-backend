@@ -1,6 +1,6 @@
 export const config = {
   log: {
-    level: 2,
+    level: 3,
     type: "console",
     dir: "./logs/",
     name: "log-server"
@@ -10,7 +10,7 @@ export const config = {
       host      : "localhost",
       user      : "root",
       password  : "",
-      database  : "larimar"
+      database  : "myqj"
     },
     production: {
       host      : "localhost",

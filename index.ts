@@ -1,5 +1,5 @@
-import {Server, authProtect} from 'midgar';
+import {Server, auth} from 'midgar';
 
 const server = new Server();
-server.appUse(authProtect.intercept);
+server.appUse(auth.required);
 server.run();

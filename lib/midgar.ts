@@ -5,4 +5,4 @@ export * from './logger';
 export * from './dataBase';
 export * from './server';
 export * from './token';
-export * from './authProtect';
+export * from './auth';

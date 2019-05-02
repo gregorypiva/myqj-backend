@@ -1,7 +1,7 @@
 const api = require('express').Router();
-// import {authenticate, register} from 'midgar';
+import {auth} from 'midgar';
 
-// api.post('/login', authenticate);
-// api.post('/register', register);
+api.post('/login', auth.login);
+api.post('/register', auth.register);
 
 module.exports = api;
