@@ -26,6 +26,8 @@ export const config = {
   },
   publicUrl: [
     '/api/login',
-    '/api/register'
+    '/api/register',
+    '/api/ticket/generate',
+    '/api/ticket/get'
   ]
 }

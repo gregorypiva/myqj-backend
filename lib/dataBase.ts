@@ -17,7 +17,7 @@ class Database {
   static async insert (sql: string, args: Array<any>): Promise<boolean> {
     try {
       const response = await this.query(sql, args);
-      return Promise.resolve(response && response[0].affectedRows > 0 ? true : false);
+      return Promise.resolve(response && response[0].affectedRows > 0 ? response[0] : false);
     } catch (e) {
       return Promise.reject('at insert in database.js: ' + e);
     }

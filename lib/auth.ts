@@ -6,7 +6,7 @@ import { logger } from './logger';
 const authConfig = config.publicUrl;
 
 const required = (req: any, res: any, next: any) => {
-  if (authConfig.includes(req.url)) {
+  if (authConfig.includes(req.url.replace(/\?.*/, ''))) {
     next();
     return;
   }
