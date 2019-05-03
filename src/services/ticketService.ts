@@ -29,11 +29,31 @@ const generate = async (demande: Ticket): Promise<any> => {
 }
 
 const get = async (id: number): Promise<any> => {
-  return Promise.resolve(id);
+  try {
+    const response = await Database.select(`
+    SELECT * FROM demande, motifs
+      WHERE dem_id_patient = ?
+      AND dem_id_demande = ?
+      AND dem_id_motif = mot_id_motif LIMIT 1
+    `, [0, id]);
+    if (response.length > 0) return Promise.resolve(response);
+    else return Promise.reject('Le ticket demandé n\'éxiste pas.');
+  } catch(e) {
+    return Promise.reject(e);
+  }
 }
 
 const getAll = async (): Promise<any> => {
-  return Promise.resolve('id');
+  try {
+    const response = await Database.select(`
+      SELECT * FROM demande
+        WHERE dem_id_patient = ?`
+      ,[0]
+    );
+    return Promise.resolve(response);
+  } catch(e) {
+    return Promise.reject(e);
+  }
 }
 
 export const ticketService = {

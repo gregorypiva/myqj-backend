@@ -1,4 +1,4 @@
-import {Database, token, logger} from 'midgar';
+import {Database, token} from 'midgar';
 
 // // Check if the user exists in database (matching username and password) which we'll say is good enough to be authenticated.
 const authenticate = async (username: string, password: string): Promise<string|boolean> => {
@@ -9,7 +9,6 @@ const authenticate = async (username: string, password: string): Promise<string|
       WHERE idt_connexion = ?
         AND idt_password = ?
   `, [username, password]);
-  logger.info(JSON.stringify(response));
   if(response.length > 0) return Promise.resolve(token.createToken({username, password}));
   else return Promise.reject('Username or password incorrect');
   } catch (e) {

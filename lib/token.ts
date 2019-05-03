@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-import {config} from 'midgar';
+import {config, logger} from 'midgar';
 
 // Create a token from a payload.
 const createToken = (payload: object) => {
@@ -9,9 +9,14 @@ const createToken = (payload: object) => {
 
 // Verify the token.
 const verifyToken = (token: string) => {
-  jwt.verify(token, config.jwt.secretKey, (err: any, decoded: any) => {
-    if (err) throw new Error(`${err.name}: ${err.message}`);
-    else return decoded;
+  logger.info('test token :' + token);
+  jwt.verify(token, config.jwt.secretKey, (e: any, decoded: any) => {
+    logger.error(e);
+    if (e) throw new Error(`${e.name}: ${e.message}`);
+    else {
+      logger.info(decoded);
+      return decoded;
+    }
   });
 }
 

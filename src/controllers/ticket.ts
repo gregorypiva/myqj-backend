@@ -23,7 +23,13 @@ const get = async (req: any, res: any, next: any) => {
 }
 
 const getAll = async (req: any, res: any, next: any) => {
-  return Server.createSuccessResponse(res, 'response');
+  try {
+    const response = await ticketService.getAll();
+    return Server.createSuccessResponse(res, response);
+  } catch(e) {
+    logger.error(e);
+    return Server.createErrorResponse(res, httpStatus.BAD_REQUEST, e);
+  }
 }
 
 export const ticket = {

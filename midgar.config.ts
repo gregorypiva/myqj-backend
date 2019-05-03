@@ -28,6 +28,6 @@ export const config = {
     '/api/login',
     '/api/register',
     '/api/ticket/generate',
-    '/api/ticket/get'
+    '/api/ticket/get',
   ]
 }

@@ -1,7 +1,6 @@
 const httpStatus = require("http-status");
-import {Server, token, config} from 'midgar';
+import {Server, token, config, logger} from 'midgar';
 import {authService} from 'services/authService';
-import { logger } from './logger';
 
 const authConfig = config.publicUrl;
 
@@ -28,7 +27,6 @@ const login = async (req: any, res: any, next: any) => {
     const token = await authService.authenticate(req.body.username, req.body.password);
     return Server.createSuccessResponse(res, {accessToken: token});
   } catch(e) {
-    logger.error(e);
     return Server.createErrorResponse(res, httpStatus.BAD_REQUEST, e);
   }
 }
