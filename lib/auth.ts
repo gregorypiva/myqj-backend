@@ -1,12 +1,11 @@
-const httpStatus = require("http-status");
 import {Server, token, config} from 'midgar';
 import {authService} from 'services/authService';
 
-const authConfig = config.publicUrl;
+const authConfig: Array<string> = config.publicUrl;
 
 const required = (req: any, res: any, next: any) => {
   // if public url include url called
-  if (inPublicUrl(authConfig, req)) {
+  if (inPublicUrl(authConfig, req.url)) {
     return next();
   }
   try {
@@ -42,8 +41,8 @@ const register = async (req: any, res: any, next: any) => {
   }
 }
 
-function inPublicUrl(urls: Array<string>, req: any): boolean {
-  return urls.includes(req.url.replace(/\?.*/, ''));
+function inPublicUrl(urls: Array<string>, url: any): boolean {
+  return urls.includes(url.replace(/\?.*/, ''));
 }
 
 export const auth = {
