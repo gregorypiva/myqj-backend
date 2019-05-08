@@ -2,6 +2,7 @@ const api = require('express').Router();
 import {auth} from 'midgar';
 import {ticket} from 'src/controllers/ticket';
 import {motif} from 'src/controllers/motif';
+import {config} from 'src/controllers/config';
 
 api.post('/login', auth.login);
 api.post('/register', auth.register);
@@ -11,5 +12,7 @@ api.get('/ticket/get', ticket.get);
 api.get('/ticket/getAll', ticket.getAll);
 
 api.get('/motif/getAll', motif.getAll);
+
+api.get('/config', config);
 
 module.exports = api;

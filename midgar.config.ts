@@ -1,4 +1,8 @@
 export const config = {
+  app: {
+    name: 'MyQJ',
+    version: '1.00',
+  },
   log: {
     level: 0,
     type: "console",
@@ -27,5 +31,6 @@ export const config = {
   publicUrl: [
     '/api/login',
     '/api/register',
+    '/api/config'
   ]
 }

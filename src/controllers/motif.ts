@@ -1,4 +1,3 @@
-const httpStatus = require("http-status");
 import {Server, logger} from 'midgar';
 import {motifService} from 'services/motifService';
 

@@ -1,7 +1,7 @@
 "use strict";
 
 const mysql = require('mysql2/promise');
-import {config, logger} from 'midgar';
+import {config} from 'midgar';
 
 class Database {
 
@@ -47,7 +47,6 @@ class Database {
     try {
       connection = await mysql.createConnection({host, user, database, socketPath});
       const results = await connection.query(sql, args);
-      logger.info('at query - request : ' + sql + '\r\n Results : ' + JSON.stringify(results[0]), 'database.js');
       if (connection) connection.end();
       return Promise.resolve(results);
     } catch (e) {
