@@ -1,6 +1,6 @@
 export const config = {
   log: {
-    level: 3,
+    level: 0,
     type: "console",
     dir: "./logs/",
     name: "log-server"
@@ -27,7 +27,5 @@ export const config = {
   publicUrl: [
     '/api/login',
     '/api/register',
-    '/api/ticket/generate',
-    '/api/ticket/get',
   ]
 }

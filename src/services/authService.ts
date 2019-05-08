@@ -1,6 +1,6 @@
-import {Database, token} from 'midgar';
+import {Database, token, logger} from 'midgar';
 
-// // Check if the user exists in database (matching username and password) which we'll say is good enough to be authenticated.
+// Check if the user exists in database (matching username and password) which we'll say is good enough to be authenticated.
 const authenticate = async (username: string, password: string): Promise<string|boolean> => {
   if(!username || !password) return Promise.reject(`Invalid login request. Must contain a valid username and password.`);
   try {
@@ -9,8 +9,8 @@ const authenticate = async (username: string, password: string): Promise<string|
       WHERE idt_connexion = ?
         AND idt_password = ?
   `, [username, password]);
-  if(response.length > 0) return Promise.resolve(token.createToken({username, password}));
-  else return Promise.reject('Username or password incorrect');
+  if(response.length > 0) return Promise.resolve(token.createToken({id: response[0].idt_id_patient, username, password}));
+  else return Promise.reject({code: 'BAD_REQUEST', message: 'Username or password incorrect'});
   } catch (e) {
     return Promise.reject(e);
   }
@@ -26,7 +26,7 @@ const register = async (args: any): Promise<string|boolean> => {
 
   try {
     const exist = await Database.select(`SELECT idt_id_patient FROM identifiants WHERE idt_connexion = ?`, [username]);
-    if (exist.length > 0) return Promise.reject(`User ${username} already exists.`);
+    if (exist.length > 0) return Promise.reject({code: 'BAD_REQUEST', message: `User ${username} already exists.`});
     const value = await Database.insert(
       `INSERT INTO identifiants
         (idt_connexion, idt_password)
@@ -36,7 +36,8 @@ const register = async (args: any): Promise<string|boolean> => {
       username,
       password
     ])
-    if(value) return Promise.resolve(token.createToken({username, password}));
+
+    if(value) return Promise.resolve(token.createToken({id: (value as any).insertId, username, password}));
   } catch (e) {
     Promise.reject(e);
   }

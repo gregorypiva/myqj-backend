@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-import {config, logger} from 'midgar';
+import {config} from 'midgar';
 
 // Create a token from a payload.
 const createToken = (payload: object) => {
@@ -8,19 +8,20 @@ const createToken = (payload: object) => {
 }
 
 // Verify the token.
-const verifyToken = (token: string) => {
-  logger.info('test token :' + token);
-  jwt.verify(token, config.jwt.secretKey, (e: any, decoded: any) => {
-    logger.error(e);
+const verifyToken = (req: any) => {
+  let token = req.headers.authorization || req.body.authorization;
+  if (token && token.split(" ")[0] === "Bearer") {
+    token = token.split(" ")[1];
+  } else {
+    return false;
+  }
+  return jwt.verify(token, config.jwt.secretKey, (e: any, decoded: any) => {
     if (e) throw new Error(`${e.name}: ${e.message}`);
     else {
-      logger.info(decoded);
       return decoded;
     }
   });
 }
-
-// @TODO CR: si c'est un JWT token, tu devrais avoir plus de fonction autour ex: decode token, ...
 
 export const token = {
   createToken,

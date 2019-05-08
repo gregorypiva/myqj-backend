@@ -73,8 +73,10 @@ class Server {
     return res.status(status).json(body);
   }
 
-  static createErrorResponse = (res: any, status: any, message: any) => {
-    return res.status(status).json({status, message});
+  static createErrorResponse = (res: any, status?: any, message?: any) => {
+    status = httpStatus[status] || httpStatus.INTERNAL_SERVER_ERROR;
+    message = message || 'Une erreur technique s\'est produite';
+    return res.status(status).json(message);
   }
 }
 

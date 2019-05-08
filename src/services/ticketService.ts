@@ -1,4 +1,4 @@
-import {logger, Database} from 'midgar';
+import {logger, Database, token} from 'midgar';
 
 interface Ticket {
   motif: number;
@@ -6,12 +6,12 @@ interface Ticket {
   type: string;
 }
 
-const generate = async (demande: Ticket): Promise<any> => {
+const generate = async (req: any, userId: number): Promise<any> => {
   logger.debug(`Appel de l'api : /api/ticket/generate (-) 
-    ${JSON.stringify(demande)}`);
-  if (isNaN(demande.motif)) return Promise.reject('Erreur lors de la création du ticket.') 
+    ${JSON.stringify(req.body.demande)}`);
+  if (isNaN(req.body.demande.motif)) return Promise.reject('Erreur lors de la création du ticket.') 
   const date = new Date();
-  const time = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${demande.time}:00`;
+  const time = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${req.body.demande.time}:00`;
   try {
     const response = await Database.insert(
       `INSERT INTO demande
@@ -19,8 +19,8 @@ const generate = async (demande: Ticket): Promise<any> => {
         VALUES (?, ?)
       `,
     [
-      0,
-      demande.motif
+      userId,
+      req.body.demande.motif
     ])
     return Promise.resolve(response);
   } catch(e) {
@@ -28,14 +28,16 @@ const generate = async (demande: Ticket): Promise<any> => {
   }
 }
 
-const get = async (id: number): Promise<any> => {
+const get = async (id: number, userId: number): Promise<any> => {
+  if (!id) return Promise.reject('Aucun numéro de ticket');
   try {
     const response = await Database.select(`
     SELECT * FROM demande, motifs
       WHERE dem_id_patient = ?
       AND dem_id_demande = ?
       AND dem_id_motif = mot_id_motif LIMIT 1
-    `, [0, id]);
+    `, [userId, id]);
+    console.log(userId, id)
     if (response.length > 0) return Promise.resolve(response);
     else return Promise.reject('Le ticket demandé n\'éxiste pas.');
   } catch(e) {
@@ -43,14 +45,21 @@ const get = async (id: number): Promise<any> => {
   }
 }
 
-const getAll = async (): Promise<any> => {
+const getAll = async (userId: number): Promise<any> => {
   try {
-    const response = await Database.select(`
+    const valide = await Database.select(`
       SELECT * FROM demande
-        WHERE dem_id_patient = ?`
-      ,[0]
+        WHERE dem_id_patient = ?
+          AND date(dem_date) < CURDATE()`
+      ,[userId]
     );
-    return Promise.resolve(response);
+    const waiting = await Database.select(`
+      SELECT * FROM demande
+        WHERE dem_id_patient = ?
+        AND date(dem_date) = CURDATE()`
+      ,[userId]
+    );
+    return Promise.resolve({waiting, valide});
   } catch(e) {
     return Promise.reject(e);
   }

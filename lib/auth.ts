@@ -1,25 +1,27 @@
 const httpStatus = require("http-status");
-import {Server, token, config, logger} from 'midgar';
+import {Server, token, config} from 'midgar';
 import {authService} from 'services/authService';
 
 const authConfig = config.publicUrl;
 
 const required = (req: any, res: any, next: any) => {
-  if (authConfig.includes(req.url.replace(/\?.*/, ''))) {
-    next();
-    return;
-  }
-  if (isAuthHeaderInvalid(req)) {
-    return Server.createErrorResponse(res, httpStatus.UNAUTHORIZED, `Error in authorization format. Invalid authentication header.`);
+  // if public url include url called
+  if (inPublicUrl(authConfig, req)) {
+    return next();
   }
   try {
-    // @TODO CR: split will be in error if headers contains 1 or no element. #Out of memory
-    token.verifyToken(req.headers.authorization.split(" ")[1]);
+    // if header not include bearer token
+    const authentication = token.verifyToken(req);
+    if (!authentication) {
+      return Server.createErrorResponse(res, 'UNAUTHORIZED', `Error in authorization format. Invalid authentication header.`);
+    }
     next();
   } catch (e) {
-    return Server.createErrorResponse(res, httpStatus.INTERNAL_SERVER_ERROR, `${e} ${httpStatus["500_MESSAGE"]}`);
+    if(e.message === "TokenExpiredError: jwt expired") {
+      return Server.createErrorResponse(res, 'UNAUTHORIZED', `TOKEN_EXPIRED`);
+    }
+    return Server.createErrorResponse(res, 'INTERNAL_SERVER_ERROR', `${e}`);
   }
-  next();
 }
 
 const login = async (req: any, res: any, next: any) => {
@@ -27,7 +29,7 @@ const login = async (req: any, res: any, next: any) => {
     const token = await authService.authenticate(req.body.username, req.body.password);
     return Server.createSuccessResponse(res, {accessToken: token});
   } catch(e) {
-    return Server.createErrorResponse(res, httpStatus.BAD_REQUEST, e);
+    return Server.createErrorResponse(res, e.code, e.message);
   }
 }
 
@@ -36,13 +38,12 @@ const register = async (req: any, res: any, next: any) => {
     const token = await authService.register(req.body);
     return Server.createSuccessResponse(res, {accessToken: token});
   } catch(e) {
-    return Server.createErrorResponse(res, httpStatus.BAD_REQUEST, e);
+    return Server.createErrorResponse(res, e.code, e.message);
   }
 }
 
-function isAuthHeaderInvalid(req: any) {
-  const authHeader = req.headers.authorization;
-  return !authHeader || authHeader.split(" ")[0] !== "Bearer";
+function inPublicUrl(urls: Array<string>, req: any): boolean {
+  return urls.includes(req.url.replace(/\?.*/, ''));
 }
 
 export const auth = {

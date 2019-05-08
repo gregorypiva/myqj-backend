@@ -1,34 +1,37 @@
 const httpStatus = require("http-status");
-import {Server, logger} from 'midgar';
+import {Server, logger, token} from 'midgar';
 import {ticketService} from 'services/ticketService';
 
 const generate = async (req: any, res: any, next: any) => {
   try {
-    const response = await ticketService.generate(req.body);
+    const user = token.verifyToken(req);
+    const response = await ticketService.generate(req, user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
     logger.error(e);
-    return Server.createErrorResponse(res, httpStatus.BAD_REQUEST, e);
+    return Server.createErrorResponse(res, 'BAD_REQUEST', e);
   }
 }
 
 const get = async (req: any, res: any, next: any) => {
   try {
-    const response = await ticketService.get(req.query.id);
+    const user = token.verifyToken(req);
+    const response = await ticketService.get(req.query.id, user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
     logger.error(e);
-    return Server.createErrorResponse(res, httpStatus.BAD_REQUEST, e);
+    return Server.createErrorResponse(res, 'BAD_REQUEST', e);
   }
 }
 
 const getAll = async (req: any, res: any, next: any) => {
   try {
-    const response = await ticketService.getAll();
+    const user = token.verifyToken(req);
+    const response = await ticketService.getAll(user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
     logger.error(e);
-    return Server.createErrorResponse(res, httpStatus.BAD_REQUEST, e);
+    return Server.createErrorResponse(res, 'BAD_REQUEST', e);
   }
 }
 
