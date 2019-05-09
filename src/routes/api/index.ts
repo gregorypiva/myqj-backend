@@ -9,6 +9,7 @@ api.post('/register', auth.register);
 
 api.post('/ticket/generate', ticket.generate);
 api.get('/ticket/get', ticket.get);
+api.post('/ticket/delete', ticket.deleteDemande);
 api.get('/ticket/getAll', ticket.getAll);
 
 api.get('/motif/getAll', motif.getAll);

@@ -28,6 +28,27 @@ const generate = async (req: any, userId: number): Promise<any> => {
   }
 }
 
+const deleteDemande = async (req: any, userId: number): Promise<any> => {
+  logger.debug(`Appel de l'api : /api/ticket/delete (-) 
+    ${JSON.stringify(req.body.demande)}`);
+  if (isNaN(req.body.idDemande)) return Promise.reject('Erreur lors de la demande d\'annulation.') 
+  try {
+    const response = await Database.update(
+      `UPDATE demande
+        SET dem_statut = 'D'
+        WHERE dem_id_patient = ?
+          AND dem_id_demande = ?
+      `,
+    [
+      userId,
+      req.body.idDemande
+    ])
+    return Promise.resolve(response);
+  } catch(e) {
+    return Promise.reject(e);
+  }
+}
+
 const get = async (id: number, userId: number): Promise<any> => {
   if (!id) return Promise.reject('Aucun numéro de ticket');
   try {
@@ -35,7 +56,8 @@ const get = async (id: number, userId: number): Promise<any> => {
     SELECT * FROM demande, motifs
       WHERE dem_id_patient = ?
       AND dem_id_demande = ?
-      AND dem_id_motif = mot_id_motif LIMIT 1
+      AND dem_id_motif = mot_id_motif
+      AND dem_statut != 'D' LIMIT 1
     `, [userId, id]);
     console.log(userId, id)
     if (response.length > 0) return Promise.resolve(response);
@@ -50,13 +72,15 @@ const getAll = async (userId: number): Promise<any> => {
     const valide = await Database.select(`
       SELECT * FROM demande
         WHERE dem_id_patient = ?
-          AND date(dem_date) < CURDATE()`
+          AND date(dem_date) < CURDATE()
+          AND dem_statut != 'D'`
       ,[userId]
     );
     const waiting = await Database.select(`
       SELECT * FROM demande
         WHERE dem_id_patient = ?
-        AND date(dem_date) = CURDATE()`
+        AND date(dem_date) = CURDATE()
+        AND dem_statut != 'D'`
       ,[userId]
     );
     return Promise.resolve({waiting, valide});
@@ -68,5 +92,6 @@ const getAll = async (userId: number): Promise<any> => {
 export const ticketService = {
   generate,
   get,
+  deleteDemande,
   getAll
 }
