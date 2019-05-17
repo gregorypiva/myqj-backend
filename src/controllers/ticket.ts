@@ -1,48 +1,43 @@
-const httpStatus = require("http-status");
-import {Server, logger, token} from 'midgar';
+import {Server, logger} from 'midgar';
 import {ticketService} from 'services/ticketService';
 
-const generate = async (req: any, res: any, next: any) => {
+const generate = async (req: any, res: any) => {
   try {
-    const user = token.verifyToken(req);
-    const response = await ticketService.generate(req, user.id);
+    const response = await ticketService.generate(req);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
     logger.error(e);
-    return Server.createErrorResponse(res, 'BAD_REQUEST', e);
+    return Server.createErrorResponse(res, e.code, e.message);
   }
 }
 
-const get = async (req: any, res: any, next: any) => {
+const get = async (req: any, res: any) => {
   try {
-    const user = token.verifyToken(req);
-    const response = await ticketService.get(req.query.id, user.id);
+    const response = await ticketService.get(req.query.id, req.body.user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
     logger.error(e);
-    return Server.createErrorResponse(res, 'BAD_REQUEST', e);
+    return Server.createErrorResponse(res, e.code, e.message);
   }
 }
 
-const deleteDemande = async (req: any, res: any, next: any) => {
+const deleteDemande = async (req: any, res: any) => {
   try {
-    const user = token.verifyToken(req);
-    const response = await ticketService.deleteDemande(req, user.id);
+    const response = await ticketService.deleteDemande(req, req.body.user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
     logger.error(e);
-    return Server.createErrorResponse(res, 'BAD_REQUEST', e);
+    return Server.createErrorResponse(res, e.code, e.message);
   }
 }
 
-const getAll = async (req: any, res: any, next: any) => {
+const getAll = async (req: any, res: any) => {
   try {
-    const user = token.verifyToken(req);
-    const response = await ticketService.getAll(user.id);
+    const response = await ticketService.getAll(req.body.user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
     logger.error(e);
-    return Server.createErrorResponse(res, 'BAD_REQUEST', e);
+    return Server.createErrorResponse(res, e.code, e.message);
   }
 }
 

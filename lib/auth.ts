@@ -1,4 +1,4 @@
-import {Server, token, config} from 'midgar';
+import {Server, token, config, logger} from 'midgar';
 import {authService} from 'services/authService';
 
 const authConfig: Array<string> = config.publicUrl;
@@ -10,8 +10,8 @@ const required = (req: any, res: any, next: any) => {
   }
   try {
     // if header not include bearer token
-    const authentication = token.verifyToken(req);
-    if (!authentication) {
+    req.body.user = token.verifyToken(req);
+    if (!req.body.user) {
       return Server.createErrorResponse(res, 'UNAUTHORIZED', `Error in authorization format. Invalid authentication header.`);
     }
     next();
@@ -19,11 +19,12 @@ const required = (req: any, res: any, next: any) => {
     if(e.message === "TokenExpiredError: jwt expired") {
       return Server.createErrorResponse(res, 'UNAUTHORIZED', `TOKEN_EXPIRED`);
     }
-    return Server.createErrorResponse(res, 'INTERNAL_SERVER_ERROR', `${e}`);
+    logger.error(e, 'midgar/auth.ts');
+    return Server.createErrorResponse(res, 500, `${e}`);
   }
 }
 
-const login = async (req: any, res: any, next: any) => {
+const login = async (req: any, res: any) => {
   try {
     const token = await authService.authenticate(req.body.username, req.body.password);
     return Server.createSuccessResponse(res, {accessToken: token});
@@ -32,7 +33,7 @@ const login = async (req: any, res: any, next: any) => {
   }
 }
 
-const register = async (req: any, res: any, next: any) => {
+const register = async (req: any, res: any) => {
   try {
     const token = await authService.register(req.body);
     return Server.createSuccessResponse(res, {accessToken: token});
@@ -42,7 +43,12 @@ const register = async (req: any, res: any, next: any) => {
 }
 
 function inPublicUrl(urls: Array<string>, url: any): boolean {
-  return urls.includes(url.replace(/\?.*/, ''));
+  for (let regex in urls) {
+    if (url.match(urls[regex])) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export const auth = {

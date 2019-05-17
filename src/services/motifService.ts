@@ -6,7 +6,8 @@ const getAll = async (): Promise<any> => {
       SELECT * FROM motifs WHERE mot_actif = 1`);
     return Promise.resolve(response);
   } catch(e) {
-    return Promise.reject(e);
+    logger.error(e);
+    return Promise.reject({message: e});
   }
 }
 

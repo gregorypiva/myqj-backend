@@ -10,7 +10,7 @@ class Database {
       const response = await this.query(sql, args);
       return Promise.resolve(response[0]);
     } catch (e) {
-      return Promise.reject('at select in database.js: ' + e);
+      return Promise.reject({code: 500, message: 'at select in database.js: ' + e});
     }
   }
 
@@ -19,7 +19,7 @@ class Database {
       const response = await this.query(sql, args);
       return Promise.resolve(response && response[0].affectedRows > 0 ? response[0] : false);
     } catch (e) {
-      return Promise.reject('at insert in database.js: ' + e);
+      return Promise.reject({code: 500, message: 'at insert in database.js: ' + e});
     }
   }
 
@@ -28,7 +28,7 @@ class Database {
       const response = await this.query(sql, args);
       return Promise.resolve(response && response[0].affectedRows ? response[0].affectedRows : 0);
     } catch (e) {
-      return Promise.reject('at update in database.js: ' + e);
+      return Promise.reject({code: 500, message: 'at update in database.js: ' + e});
     }
   }
 
@@ -37,7 +37,8 @@ class Database {
       const response = await this.query(sql, args);
       return Promise.resolve(response && response[0].affectedRows ? response[0].affectedRows : 0);
     } catch (e) {
-      return Promise.reject('at delete in database.js: ' + e);
+      return Promise.reject({code: 500, message: 'at delete in database.js: ' + e});
+
     }
   }
 

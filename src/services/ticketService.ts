@@ -1,15 +1,13 @@
-import {logger, Database, token} from 'midgar';
+import {logger, Database} from 'midgar';
 
-interface Ticket {
-  motif: number;
-  time: number;
-  type: string;
-}
+const generate = async (req: any): Promise<any> => {
 
-const generate = async (req: any, userId: number): Promise<any> => {
   logger.debug(`Appel de l'api : /api/ticket/generate (-) 
     ${JSON.stringify(req.body.demande)}`);
-  if (isNaN(req.body.demande.motif)) return Promise.reject('Erreur lors de la création du ticket.') 
+
+  if (isNaN(req.body.demande.motif)) {
+    return Promise.reject({message: 'Erreur lors de la création du ticket.'});
+  }
   const date = new Date();
   const time = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${req.body.demande.time}:00`;
   try {
@@ -19,19 +17,21 @@ const generate = async (req: any, userId: number): Promise<any> => {
         VALUES (?, ?)
       `,
     [
-      userId,
+      req.body.user.id,
       req.body.demande.motif
     ])
     return Promise.resolve(response);
   } catch(e) {
-    return Promise.reject(e);
+    return Promise.reject({message: e});
   }
 }
 
 const deleteDemande = async (req: any, userId: number): Promise<any> => {
+
   logger.debug(`Appel de l'api : /api/ticket/delete (-) 
     ${JSON.stringify(req.body.demande)}`);
-  if (isNaN(req.body.idDemande)) return Promise.reject('Erreur lors de la demande d\'annulation.') 
+
+  if (isNaN(req.body.idDemande)) return Promise.reject({message: 'Erreur lors de la demande d\'annulation.'}) 
   try {
     const response = await Database.update(
       `UPDATE demande
@@ -45,47 +45,50 @@ const deleteDemande = async (req: any, userId: number): Promise<any> => {
     ])
     return Promise.resolve(response);
   } catch(e) {
-    return Promise.reject(e);
+    return Promise.reject({message: e});
   }
 }
 
 const get = async (id: number, userId: number): Promise<any> => {
-  if (!id) return Promise.reject('Aucun numéro de ticket');
+
+  logger.debug(`Appel de l'api : /api/ticket/get (-) 
+    ${id}, ${userId}`);
+
+  if (!id) return Promise.reject({message: 'Aucun numéro de ticket'});
+
   try {
     const response = await Database.select(`
-    SELECT * FROM demande, motifs
+    SELECT dem_id_demande, dem_id_motif, dem_date, dem_tempsattente_estime, dem_tempsattente_reel,
+    IF(DATE(dem_date) < CURDATE(), 'E', dem_statut) as dem_statut,
+    motifs.*
+    FROM demande, motifs
       WHERE dem_id_patient = ?
       AND dem_id_demande = ?
       AND dem_id_motif = mot_id_motif
       AND dem_statut != 'D' LIMIT 1
     `, [userId, id]);
-    console.log(userId, id)
     if (response.length > 0) return Promise.resolve(response);
-    else return Promise.reject('Le ticket demandé n\'éxiste pas.');
+    else return Promise.reject({code: 404, message: 'Le ticket demandé n\'éxiste pas.'});
   } catch(e) {
-    return Promise.reject(e);
+    return Promise.reject({code: 500, message: e});
   }
 }
 
 const getAll = async (userId: number): Promise<any> => {
+
+  logger.debug(`Appel de l'api : /api/ticket/getAll (-) ${userId}`);
+
   try {
-    const valide = await Database.select(`
-      SELECT * FROM demande
-        WHERE dem_id_patient = ?
-          AND date(dem_date) < CURDATE()
-          AND dem_statut != 'D'`
-      ,[userId]
-    );
-    const waiting = await Database.select(`
-      SELECT * FROM demande
-        WHERE dem_id_patient = ?
-        AND date(dem_date) = CURDATE()
-        AND dem_statut != 'D'`
-      ,[userId]
-    );
-    return Promise.resolve({waiting, valide});
+    const response = await Database.select(`
+      SELECT dem_id_demande, dem_id_motif, dem_date, dem_tempsattente_estime, dem_tempsattente_reel,
+      IF(DATE(dem_date) < CURDATE(), 'E', dem_statut) as dem_statut
+      FROM demande
+      WHERE dem_id_patient = 1
+          AND dem_statut != 'D'
+    `, [userId]);
+    return Promise.resolve(response);
   } catch(e) {
-    return Promise.reject(e);
+    return Promise.reject({code: 500, message: e});
   }
 }
 

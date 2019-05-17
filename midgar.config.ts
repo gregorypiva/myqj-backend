@@ -1,7 +1,8 @@
 export const config = {
   app: {
     name: 'MyQJ',
-    version: '1.00',
+    version: '1.1.2',
+    mode: 'development',
   },
   log: {
     level: 0,
@@ -29,8 +30,13 @@ export const config = {
     expiresIn: "1h"
   },
   publicUrl: [
+    '/public/*',
     '/api/login',
     '/api/register',
     '/api/config'
-  ]
+  ],
+  errorResponse: {
+    400: 'test response 400',
+    401: 'test response 401',
+  }
 }

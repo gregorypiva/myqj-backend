@@ -2,7 +2,7 @@ import {Database, token, logger} from 'midgar';
 
 // Check if the user exists in database (matching username and password) which we'll say is good enough to be authenticated.
 const authenticate = async (username: string, password: string): Promise<string|boolean> => {
-  if(!username || !password) return Promise.reject(`Invalid login request. Must contain a valid username and password.`);
+  if(!username || !password) return Promise.reject({message: `Invalid login request. Must contain a valid username and password.`});
   try {
     const response = await Database.select(`
     SELECT idt_id_patient FROM identifiants
@@ -12,17 +12,14 @@ const authenticate = async (username: string, password: string): Promise<string|
   if(response.length > 0) return Promise.resolve(token.createToken({id: response[0].idt_id_patient, username, password}));
   else return Promise.reject({code: 'BAD_REQUEST', message: 'Username or password incorrect'});
   } catch (e) {
-    return Promise.reject(e);
+    logger.error(e, 'AuthService/authenticate');
+    return Promise.reject({code: 500});
   }
 }
 
 const register = async (args: any): Promise<string|boolean> => {
-  const {
-    username,
-    password
-  } = args;
-
-  if(!username || !password) return Promise.reject(`Invalid register request. Must contain a valid username and password.`);
+  const { username, password } = args;
+  if(!username || !password) return Promise.reject({message: `Invalid register request. Must contain a valid username and password.`});
 
   try {
     const exist = await Database.select(`SELECT idt_id_patient FROM identifiants WHERE idt_connexion = ?`, [username]);
@@ -39,7 +36,8 @@ const register = async (args: any): Promise<string|boolean> => {
 
     if(value) return Promise.resolve(token.createToken({id: (value as any).insertId, username, password}));
   } catch (e) {
-    Promise.reject(e);
+    logger.error(e, 'AuthService/register');
+    Promise.reject({code: 500});
   }
 }
 
