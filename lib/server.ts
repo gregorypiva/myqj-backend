@@ -25,7 +25,7 @@ class Server {
     try{
       require('src/routes')(this.app);
     } catch (e) {
-      if (e instanceof TypeError) logger.error(e.message);
+      if (e instanceof TypeError) logger.error(e.message, 'server/run');
     }
     const server = http.createServer(this.app);
     server.listen(this.port);
@@ -55,11 +55,11 @@ class Server {
     // handle specific listen errors with friendly messages
     switch (error.code) {
       case 'EACCES':
-        logger.error(bind + ' requires elevated privileges');
+        logger.error(bind + ' requires elevated privileges', 'server/EACCES');
         process.exit(1);
         break;
       case 'EADDRINUSE':
-        logger.error(bind + ' is already in use');
+        logger.error(bind + ' is already in use', 'server/EADDRINUSE');
         process.exit(1);
         break;
       default:
@@ -78,7 +78,7 @@ class Server {
                   ? status
                   : httpStatus[status] || httpStatus.INTERNAL_SERVER_ERROR;
 
-    const response = config.app.mode === 'development'
+    const response = config.app.mode === 'development' || code === 400
                       ? message || httpStatus[`${code}_MESSAGE`]
                       : (config as any).errorResponse[code] || httpStatus[`${code}_MESSAGE`];
 

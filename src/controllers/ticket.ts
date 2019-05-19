@@ -6,7 +6,7 @@ const generate = async (req: any, res: any) => {
     const response = await ticketService.generate(req);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
-    logger.error(e);
+    logger.error(JSON.stringify(e), 'controllers/ticket/generate');
     return Server.createErrorResponse(res, e.code, e.message);
   }
 }
@@ -16,7 +16,7 @@ const get = async (req: any, res: any) => {
     const response = await ticketService.get(req.query.id, req.body.user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
-    logger.error(e);
+    logger.error(JSON.stringify(e), 'controllers/ticket/get');
     return Server.createErrorResponse(res, e.code, e.message);
   }
 }
@@ -26,7 +26,7 @@ const deleteDemande = async (req: any, res: any) => {
     const response = await ticketService.deleteDemande(req, req.body.user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
-    logger.error(e);
+    logger.error(JSON.stringify(e), 'controllers/ticket/deleteDemande');
     return Server.createErrorResponse(res, e.code, e.message);
   }
 }
@@ -36,7 +36,7 @@ const getAll = async (req: any, res: any) => {
     const response = await ticketService.getAll(req.body.user.id);
     return Server.createSuccessResponse(res, response);
   } catch(e) {
-    logger.error(e);
+    logger.error(JSON.stringify(e), 'controllers/ticket/getAll');
     return Server.createErrorResponse(res, e.code, e.message);
   }
 }

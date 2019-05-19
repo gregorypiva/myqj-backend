@@ -2,7 +2,7 @@ export const config = {
   app: {
     name: 'MyQJ',
     version: '1.1.2',
-    mode: 'development',
+    mode: 'production',
   },
   log: {
     level: 0,
@@ -36,7 +36,8 @@ export const config = {
     '/api/config'
   ],
   errorResponse: {
-    400: 'test response 400',
-    401: 'test response 401',
+    500: 'Une erreur technique s\'est produite.',
+    404: 'Erreur lors du chargement, veuillez réessayer',
+    401: 'Invalid authentication header.',
   }
 }

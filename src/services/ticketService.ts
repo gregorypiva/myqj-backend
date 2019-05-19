@@ -11,15 +11,36 @@ const generate = async (req: any): Promise<any> => {
   const date = new Date();
   const time = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${req.body.demande.time}:00`;
   try {
+    let numticket: any = await Database.select(
+      `SELECT SUBSTRING(dem_numticket, 2, 4) as id FROM demande
+        WHERE dem_id_patient = ? 
+          AND dem_numticket IS NOT NULL
+            ORDER BY dem_numticket DESC 
+              LIMIT 1`,
+    [
+      req.body.user.id
+    ]);
+    // On converti le motif en lettre de A à F
+    let idMotif = req.body.demande.motif + 9;
+    idMotif = idMotif.toString(16).toUpperCase();
+
+    // On vérifie si il existe un numéro de ticket pour ce patient
+    // S oui last + 1, sinon départ à 100
+    numticket = numticket[0].id.length > 0 ? Number(numticket[0].id)+1 : '100';
+
+    // On produit le ticket de type [A-F]{1}[0-9]{3}
+    req.body.demande.numticket = idMotif + numticket;
+
     const response = await Database.insert(
       `INSERT INTO demande
-        (dem_id_patient, dem_id_motif)
-        VALUES (?, ?)
+        (dem_id_patient, dem_id_motif, dem_numticket)
+        VALUES (?, ?, ?)
       `,
     [
       req.body.user.id,
-      req.body.demande.motif
-    ])
+      req.body.demande.motif,
+      req.body.demande.numticket
+    ]);
     return Promise.resolve(response);
   } catch(e) {
     return Promise.reject({message: e});
@@ -58,7 +79,7 @@ const get = async (id: number, userId: number): Promise<any> => {
 
   try {
     const response = await Database.select(`
-    SELECT dem_id_demande, dem_id_motif, dem_date, dem_tempsattente_estime, dem_tempsattente_reel,
+    SELECT dem_id_demande, dem_id_motif, dem_numticket, dem_date, dem_tempsattente_estime, dem_tempsattente_reel,
     IF(DATE(dem_date) < CURDATE(), 'E', dem_statut) as dem_statut,
     motifs.*
     FROM demande, motifs
@@ -80,7 +101,7 @@ const getAll = async (userId: number): Promise<any> => {
 
   try {
     const response = await Database.select(`
-      SELECT dem_id_demande, dem_id_motif, dem_date, dem_tempsattente_estime, dem_tempsattente_reel,
+      SELECT dem_id_demande, dem_id_motif, dem_numticket, dem_date, dem_tempsattente_estime, dem_tempsattente_reel,
       IF(DATE(dem_date) < CURDATE(), 'E', dem_statut) as dem_statut
       FROM demande
       WHERE dem_id_patient = 1

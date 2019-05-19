@@ -6,7 +6,7 @@ const getAll = async (): Promise<any> => {
       SELECT * FROM motifs WHERE mot_actif = 1`);
     return Promise.resolve(response);
   } catch(e) {
-    logger.error(e);
+    logger.error(JSON.stringify(e), 'services/motifSercice/getAll');
     return Promise.reject({message: e});
   }
 }
