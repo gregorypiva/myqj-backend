@@ -33,7 +33,7 @@
     "nodemon": "^1.19.0",
     "nodemon-webpack-plugin": "^4.0.8",
     "ts-loader": "^5.3.3",
-    "typescript": "^3.4.1",
+    "typescript": "^3.8.3",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   }
